@@ -7,8 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import type { Candidate } from "@/types/candidate";
+import CandidateStatusBadge from "@/components/CandidateStatusBadge";
 
 interface Props {
   candidates: Candidate[];
@@ -55,7 +55,7 @@ export const CandidateTable = ({ candidates }: Props) => {
                 </TableCell>
                 <TableCell>{candidate.appliedPosition}</TableCell>
                 <TableCell>
-                  <Badge>{candidate.status}</Badge>
+                  <CandidateStatusBadge status={candidate.status} />
                 </TableCell>
                 <TableCell className="text-right">
                   {candidate.experienceYears} years

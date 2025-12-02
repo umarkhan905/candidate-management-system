@@ -82,11 +82,15 @@ export type CandidateAction =
     };
 
 export type CandidateDispatch = (action: CandidateAction) => void;
+export type CandidateSortBy = "name" | "experienceYears" | "createdAt";
+export type CandidateSortOrder = "asc" | "desc";
 export interface CandidateFilters {
   status?: CandidateStatus;
   appliedPosition?: string;
   minExperience?: number;
   maxExperience?: number;
   searchQuery?: string;
+  sortBy?: CandidateSortBy;
+  sortOrder?: CandidateSortOrder;
 }
 export type RemarksType = "HR" | "Interviewer";

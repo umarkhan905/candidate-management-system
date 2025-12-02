@@ -24,6 +24,14 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CloudUpload, File, Plus } from "lucide-react";
 import { Controller, useForm, type UseFormReturn } from "react-hook-form";
 import {
@@ -38,6 +46,7 @@ import { useCandidates } from "@/context/CandidateContext";
 import { Label } from "@/components/ui/label";
 import type { CandidateEducation } from "@/types/candidate";
 import { toast } from "sonner";
+import { ErrorCard } from "@/components/ErrorCard";
 
 interface ResumeFile {
   resumeFile?: string;
@@ -74,17 +83,23 @@ export function AddCandidateModal() {
       resumeFileType: resumeFile.resumeFileType,
     };
 
-    await service.addCandidate(newCandidate);
+    const isAdded = await service.addCandidate(newCandidate);
+
+    if (!isAdded) return;
+
     toast.success("Candidate added successfully");
     setOpen(false);
     form.reset();
   };
 
-  const handleCloseModal = () => setOpen(false);
+  const onOpenChange = () => {
+    setOpen((prevOpen) => !prevOpen);
+    form.clearErrors();
+  };
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTrigger asChild>
           <Button className="cursor-pointer">
             <Plus className="mr-2 size-4" />
@@ -99,7 +114,7 @@ export function AddCandidateModal() {
             form={form}
             resumeFile={resumeFile}
             onFormSubmit={onSubmit}
-            onCloseModal={handleCloseModal}
+            onCloseModal={onOpenChange}
             onResumeChange={setResumeFile}
           />
         </DialogContent>
@@ -124,7 +139,7 @@ export function AddCandidateModal() {
             form={form}
             resumeFile={resumeFile}
             onFormSubmit={onSubmit}
-            onCloseModal={handleCloseModal}
+            onCloseModal={onOpenChange}
             onResumeChange={setResumeFile}
           />
         </div>
@@ -146,6 +161,8 @@ function AddCandidateForm({
   onCloseModal: () => void;
   onResumeChange: React.Dispatch<React.SetStateAction<ResumeFile>>;
 }) {
+  const { state } = useCandidates();
+
   const inputFileRef = React.useRef<HTMLInputElement | null>(null);
 
   const handleChooseFile = () => {
@@ -173,6 +190,8 @@ function AddCandidateForm({
 
     fileReader.readAsDataURL(file);
   };
+
+  const isLoading = state.loading.type === "ADD" && state.loading.active;
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit(onFormSubmit)}>
@@ -283,12 +302,27 @@ function AddCandidateForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="degree">Degree *</FieldLabel>
-                <Input
-                  {...field}
-                  id="degree"
-                  autoComplete="off"
-                  aria-invalid={fieldState.invalid}
-                />
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    id="degree"
+                    aria-invalid={fieldState.invalid}
+                  >
+                    <SelectValue placeholder="Select a Degree" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="Bachelor">Bachelor</SelectItem>
+                      <SelectItem value="Master">Master</SelectItem>
+                      <SelectItem value="PhD">PhD</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -552,10 +586,14 @@ function AddCandidateForm({
           Cancel
         </Button>
 
-        <Button type="submit" className="cursor-pointer">
-          Add Candidate
+        <Button type="submit" className="cursor-pointer" disabled={isLoading}>
+          {isLoading ? "Adding..." : "Add Candidate"}
         </Button>
       </div>
+
+      {state.error.type === "ADD" && state.error.message && (
+        <ErrorCard message={state.error.message} />
+      )}
     </form>
   );
 }

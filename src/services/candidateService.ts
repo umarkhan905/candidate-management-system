@@ -72,7 +72,7 @@ export class CandidateService {
 
   async addCandidate(
     candidate: Omit<Candidate, "id" | "createdAt" | "updatedAt" | "status">
-  ) {
+  ): Promise<boolean> {
     this.setLoading({ type: "ADD", active: true });
     this.setError({ type: "ADD", message: null });
     try {
@@ -91,8 +91,10 @@ export class CandidateService {
       this.storage.setData(candidates);
 
       this.dispatch({ type: "ADD_CANDIDATE", payload: newCandidate });
+      return true;
     } catch (error) {
       this.setError({ type: "ADD", message: (error as Error).message });
+      return false;
     } finally {
       this.setLoading({ type: "ADD", active: false });
     }
@@ -140,13 +142,15 @@ export class CandidateService {
 
   searchAndFilterCandidates(filters: CandidateFilters) {
     const candidates = this.storage.getData<Candidate[]>([]);
-    let filteredCandidates = candidates;
+    let filteredCandidates = [...candidates];
 
     const searchQuery = filters.searchQuery?.toLowerCase() ?? "";
     const status = filters.status?.toLowerCase();
     const appliedPosition = filters.appliedPosition?.toLowerCase();
     const minExperience = filters.minExperience;
     const maxExperience = filters.maxExperience;
+    const sortBy = filters.sortBy;
+    const sortOrder = filters.sortOrder ?? "asc";
 
     if (searchQuery)
       filteredCandidates = filteredCandidates.filter((candidate) => {
@@ -181,6 +185,26 @@ export class CandidateService {
           candidate.experienceYears >= minExperience &&
           candidate.experienceYears <= maxExperience
       );
+    }
+
+    if (sortBy) {
+      filteredCandidates = filteredCandidates.sort((a, b) => {
+        let valueA = a[sortBy];
+        let valueB = b[sortBy];
+
+        if (typeof valueA === "string" && typeof valueB === "string") {
+          valueA = valueA.toLowerCase();
+          valueB = valueB.toLowerCase();
+        }
+
+        if (valueA < valueB) {
+          return sortOrder === "asc" ? -1 : 1;
+        } else if (valueB < valueA) {
+          return sortOrder === "asc" ? 1 : -1;
+        } else {
+          return 0;
+        }
+      });
     }
 
     return filteredCandidates;

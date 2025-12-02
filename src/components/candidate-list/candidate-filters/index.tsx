@@ -1,5 +1,7 @@
 import { useCandidates } from "@/context/CandidateContext";
 import type {
+  CandidateSortBy,
+  CandidateSortOrder,
   CandidateStatus,
   CandidateFilters as Filters,
 } from "@/types/candidate";
@@ -68,6 +70,20 @@ export const CandidateFilters = ({
     onFilterChange({ ...filters, searchQuery: e.target.value });
   };
 
+  const handleSortByChange = (value: string) => {
+    onFilterChange({
+      ...filters,
+      sortBy: value === "none" ? undefined : (value as CandidateSortBy),
+    });
+  };
+
+  const handleSortOrderChange = (value: string) => {
+    onFilterChange({
+      ...filters,
+      sortOrder: value === "none" ? undefined : (value as CandidateSortOrder),
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -95,7 +111,7 @@ export const CandidateFilters = ({
         />
       </div>
 
-      <div className="gap-4 grid grid-cols-1 md:grid-cols-3">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-5">
         <Select
           value={filters.appliedPosition || "all"}
           onValueChange={handlePositionChange}
@@ -154,6 +170,33 @@ export const CandidateFilters = ({
                 Years
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.sortBy || "none"}
+          onValueChange={handleSortByChange}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>Sort By</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="experienceYears">Experience</SelectItem>
+            <SelectItem value="createdAt">Creation Time</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.sortOrder || "asc"}
+          onValueChange={handleSortOrderChange}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>Sort Order</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Asc</SelectItem>
+            <SelectItem value="desc">Desc</SelectItem>
           </SelectContent>
         </Select>
       </div>

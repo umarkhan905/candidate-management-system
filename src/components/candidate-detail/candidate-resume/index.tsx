@@ -75,7 +75,7 @@ export const CandidateResume = ({ candidate }: Props) => {
           <Page
             pageNumber={pageNumber}
             width={containerWidth > 0 ? containerWidth : undefined}
-            scale={containerWidth <= 600 ? 0.9 : 0.7}
+            scale={containerWidth <= 600 ? 0.9 : 0.8}
           />
         </Document>
 

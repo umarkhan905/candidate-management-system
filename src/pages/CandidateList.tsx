@@ -1,9 +1,12 @@
 import { CandidateFilters as Filters } from "@/components/candidate-list/candidate-filters";
 import { CandidateTable } from "@/components/candidate-list/candidate-table";
 import { Navbar } from "@/components/candidate-list/navbar";
+import { Button } from "@/components/ui/button";
+import { CANDIDATES_PER_PAGE } from "@/constants/candidate";
 import { useCandidates } from "@/context/CandidateContext";
+import { usePaginate } from "@/hooks/usePaginate";
 import type { CandidateFilters } from "@/types/candidate";
-import { Loader } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const CandidateList = () => {
@@ -14,6 +17,15 @@ const CandidateList = () => {
     () => service.searchAndFilterCandidates(filters),
     [filters, service]
   );
+
+  const {
+    data: candidates,
+    hasMore,
+    currentPage,
+    noOfPages,
+    onPrev,
+    onNext,
+  } = usePaginate(filteredCandidates, CANDIDATES_PER_PAGE);
 
   useEffect(() => {
     service.getAllCandidates();
@@ -37,7 +49,22 @@ const CandidateList = () => {
             <Filters filters={filters} onFilterChange={setFilters} />
           </div>
 
-          <CandidateTable candidates={filteredCandidates} />
+          <CandidateTable candidates={candidates} />
+
+          <div className="flex justify-between items-center">
+            <p className="text-muted-foreground text-sm">
+              Showing {currentPage} of {noOfPages} page
+            </p>
+
+            <div className="flex gap-2">
+              <Button onClick={onPrev} disabled={currentPage <= 1}>
+                <ChevronLeft />
+              </Button>
+              <Button onClick={onNext} disabled={!hasMore}>
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </>

@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import CandidateStatusBadge from "@/components/CandidateStatusBadge";
 
 interface Props {
   candidate: Candidate;
@@ -88,7 +88,7 @@ export const CandidateInfo = ({ candidate }: Props) => {
           <CardDescription>{candidate.currentPosition}</CardDescription>
         </div>
 
-        <Badge>{candidate.status}</Badge>
+        <CandidateStatusBadge status={candidate.status} />
       </CardHeader>
 
       <CardContent>

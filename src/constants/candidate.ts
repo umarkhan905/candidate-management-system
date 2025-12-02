@@ -69,3 +69,5 @@ export const CANDIDATE_EXPERIENCES = [
     max: 100,
   },
 ];
+
+export const CANDIDATES_PER_PAGE = 50;
